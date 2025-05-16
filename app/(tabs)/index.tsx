@@ -1,105 +1,139 @@
-import React, { useState } from "react";
-import { View, Image, StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 
-function App() {
-  const [img, setImg] = useState(require('../../src/biscoito.png'));
-  const [textoFrase, setTextofrase] = useState('Clique em "Quebrar Biscoito" para revelar sua sorte.');
 
-  const frases = [
-    "Grandes surpresas estão a caminho.",
-    "Você encontrará alegria onde menos espera.",
-    "Um novo começo trará grandes oportunidades.",
-    "Seu esforço será recompensado em breve.",
-    "A sorte favorece os corajosos.",
-    "Confie em sua intuição, ela sabe o caminho.",
-    "Algo que você perdeu logo será encontrado.",
-    "Sua gentileza abrirá portas importantes.",
-    "Você está prestes a fazer uma descoberta valiosa.",
-    "A vida sorrirá para você nas próximas 24 horas.",
-    "Um encontro inesperado mudará sua perspectiva.",
-    "Você é mais forte do que imagina.",
-    "Em breve, você terá motivos para comemorar.",
-    "Um pequeno gesto hoje trará grandes frutos amanhã.",
-    "Boas notícias estão chegando pelo correio ou mensagem.",
-    "O universo está conspirando a seu favor.",
-    "Hoje é um bom dia para começar algo novo.",
-    "Você será reconhecido por seu talento.",
-    "Um desejo antigo está mais próximo de se realizar.",
-    "Seu bom humor contagiará alguém especial."
-  ];
 
-  function quebraBiscoito() {
-    const numeroAleatorio = Math.floor(Math.random() * frases.length);
-    setTextofrase(`"${frases[numeroAleatorio]}"`);
-    setImg(require('../../src/biscoitoAberto.png')); // só se você tiver essa imagem
+export default function App() {
+  const [numero, setNumero] = useState('00:00:00')
+  const [botao, setBotao] = useState('Vai')
+  const [ultimo, setUltimo] = useState(null)
+  const ss = useRef(0);
+  const mm = useRef(0);
+  const hh = useRef(0);
+  const timer = useRef(null);
+
+  function vai() {
+    if (timer.current !== null) {
+      // Se o cronômetro estiver rodando, para ele
+      clearInterval(timer.current);
+      timer.current = null;
+      setBotao('Vai');
+    } else {
+      // Inicia o cronômetro
+      // Inicia o cronômetro com precisão real de 1 segundo
+  timer.current = setInterval(() => {
+  ss.current++;
+
+  if (ss.current === 60) {
+    ss.current = 0;
+    mm.current++;
   }
 
-  function novoBiscoito() {
-    setTextofrase('');
-    setImg(require('../../src/biscoito.png'));
+  if (mm.current === 60) {
+    mm.current = 0;
+    hh.current++;
   }
 
-  return (
-    <View style={styles.container}>
-      <Image source={img} style={styles.img} />
+  let format = 
+    `${hh.current < 10 ? '0' + hh.current : hh.current}:` +
+    `${mm.current < 10 ? '0' + mm.current : mm.current}:` +
+    `${ss.current < 10 ? '0' + ss.current : ss.current}`;
 
-      <Text style={styles.textofrase}>{textoFrase}</Text>
+  setNumero(format);
+}, 100); // Agora o cronômetro atualiza a cada 1 segundo real
 
-      <TouchableOpacity style={styles.botao} onPress={quebraBiscoito}>
-        <View style={styles.btnArea}>
-          <Text style={styles.btnTexto}>Quebrar Biscoito!</Text>
-        </View>
-      </TouchableOpacity>
+  
+      setBotao('Parar');
+    }
+  }
+  
+  function limpar(){
+    if(timer.current !== null){
+      clearInterval(timer.current);
+      timer.current = null;
+    }
+  
+    setUltimo(numero);
+    setNumero('00:00:00');
+    ss.current = 0;
+    mm.current = 0;
+    hh.current = 0;
+    setBotao('Vai');
+  }
+  
 
-      <TouchableOpacity
-        style={[styles.botao, { borderColor: "#121212" }]}
-        onPress={novoBiscoito}
-      >
-        <View style={styles.btnArea}>
-          <Text style={[styles.btnTexto, { color: "#121212" }]}>
-            Novo Biscoito
-          </Text>
-        </View>
-      </TouchableOpacity>
+  return(
+    <View style={styles.conteiner}>
+      
+      <Image style={styles.imagem}
+     source={require('../../src/cronometro.png'
+     )}
+      />
+      <Text style={styles.timer}>{numero}</Text>
+
+      <View style={styles.btnArea}>
+        <TouchableOpacity style={styles.btn} onPress={vai}>
+          <Text style={styles.btnTexto}>{botao}</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.btn} onPress={limpar}>
+          <Text style={styles.btnTexto}>Limpar</Text>
+        </TouchableOpacity>
+        
+        
+      </View>
+
+      <View style={styles.areaUltima}>
+        <Text style={styles.textoCorrida}>{ultimo ? 'Ultimo Tempo: ' + ultimo : ''}</Text>
+
+      </View>
     </View>
-  );
+  )
+
 }
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  conteiner:{
+    backgroundColor:'#00aeef',
+    flex:1,
+    alignItems:'center',
+    justifyContent:'center'
   },
-  img: {
-    width: 238,
-    height: 238,
-  },
-  textofrase: {
-    fontSize: 20,
-    color: "#dd7b22",
-    margin: 30,
-    fontStyle: "italic",
-    textAlign: "center",
-  },
-  botao: {
-    width: 230,
-    height: 50,
-    borderColor: "#dd7b22",
-    borderWidth: 1.5,
-    borderRadius: 10,
-    margin: 5,
-  },
-  btnArea: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  btnTexto: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#dd7b22",
-  },
-});
+  timer:{
+    marginTop: -238,
+    fontSize:45,
+    color:"white"
 
-export default App;
+  },
+  imagem:{
+    width:400,
+    height:500
+  },
+  btnArea:{
+    flexDirection: "row",
+    marginTop: 200,
+    height:40
+  },
+  btn:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+    backgroundColor:'#fff',
+    height: 40,
+    width:70,
+    margin: 17,
+    borderRadius:10
+  },
+  btnTexto:{
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#00aeef',
+  },
+  areaUltima:{
+    marginTop:40,
+  },
+  textoCorrida:{
+    fontSize: 25,
+    color:'white',
+    fontStyle:'italic'
+  }
+})
